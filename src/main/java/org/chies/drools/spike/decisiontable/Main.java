@@ -1,39 +1,39 @@
 package org.chies.drools.spike.decisiontable;
 
-import java.io.StringReader;
+import java.net.URL;
 
-import org.drools.RuleBase;
-import org.drools.RuleBaseFactory;
-import org.drools.WorkingMemory;
-import org.drools.compiler.PackageBuilder;
-import org.drools.decisiontable.InputType;
-import org.drools.decisiontable.SpreadsheetCompiler;
-import org.drools.rule.Package;
+import org.drools.KnowledgeBase;
+import org.drools.builder.KnowledgeBuilder;
+import org.drools.builder.KnowledgeBuilderFactory;
+import org.drools.builder.ResourceType;
+import org.drools.io.ResourceFactory;
+import org.drools.io.impl.ClassPathResource;
+import org.drools.runtime.StatefulKnowledgeSession;
 
 public class Main {
 
-	
 	public static void main(String[] args) {
 		try {
-			WorkingMemory workingMemory = createWorkingMemory();
+			StatefulKnowledgeSession statefulSession = createStatefulSessionWithChangeset();
 			TrafficViolation trafficViolationFact = createFact();
-			insertFactAndFireRules(workingMemory, trafficViolationFact);
+			insertFactAndFireRules(statefulSession, trafficViolationFact);
 			System.out.println("Your penalty: " + trafficViolationFact.getPenalty());
 		} catch (Throwable throwable) {
 			throwable.printStackTrace();
 		}
 	}
-		
-
-	private static void insertFactAndFireRules(WorkingMemory workingMemory, TrafficViolation trafficViolationFact) {
-		workingMemory.insert(trafficViolationFact);
-		workingMemory.fireAllRules();
+	
+	private static StatefulKnowledgeSession createStatefulSessionWithChangeset() {
+		KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+		URL changesetUrl = Thread.currentThread().getContextClassLoader().getResource("change-set.xml");
+		knowledgeBuilder.add(ResourceFactory.newUrlResource(changesetUrl), ResourceType.CHANGE_SET );
+		KnowledgeBase knowledgeBase = knowledgeBuilder.newKnowledgeBase();
+		return knowledgeBase.newStatefulKnowledgeSession();
 	}
 
-	private static WorkingMemory createWorkingMemory() throws Exception {
-		RuleBase ruleBase = readDecisionTable();
-		WorkingMemory workingMemory = ruleBase.newStatefulSession();
-		return workingMemory;
+	private static void insertFactAndFireRules(StatefulKnowledgeSession statefulSession, TrafficViolation trafficViolationFact) {
+		statefulSession.insert(trafficViolationFact);
+		statefulSession.fireAllRules();
 	}
 
 	private static TrafficViolation createFact() {
@@ -45,15 +45,12 @@ public class Main {
 		trafficViolationFact.setSpeed(170);
 		return trafficViolationFact;
 	}
-
-	private static RuleBase readDecisionTable() throws Exception {
-		final SpreadsheetCompiler converter = new SpreadsheetCompiler();
-		final String drlCompiled = converter.compile("/traffic-violation.xls", InputType.XLS);
-		PackageBuilder builder = new PackageBuilder();
-		builder.addPackageFromDrl( new StringReader( drlCompiled ) );
-		Package droolsPackage = builder.getPackage();
-		RuleBase ruleBase = RuleBaseFactory.newRuleBase();
-		ruleBase.addPackage(droolsPackage);
-		return ruleBase;
+	
+	@SuppressWarnings("unused")
+	private static StatefulKnowledgeSession createStatefulSession() throws Exception {
+		KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+		knowledgeBuilder.add(new ClassPathResource("traffic-violation.xls"), ResourceType.DTABLE);
+		KnowledgeBase knowledgeBase = knowledgeBuilder.newKnowledgeBase();
+		return knowledgeBase.newStatefulKnowledgeSession();
 	}
 }
