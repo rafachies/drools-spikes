@@ -1,0 +1,25 @@
+package insurance;
+ 
+import org.chies.drools.spike.dsl.*; 
+ 
+ 
+rule "Cliente Velho"
+    when
+        $proposal : InsuranceProposal(age >= 60);
+    then
+        $proposal.incrementScore(10);
+end
+
+rule "Cliente Jovem"
+    when
+        $proposal : InsuranceProposal(age < 25);
+    then
+        $proposal.incrementScore(20);
+end
+
+rule "Cliente Adulto"
+    when
+        $proposal : InsuranceProposal(age >= 25, age < 60);
+    then
+        $proposal.incrementScore(50);
+end

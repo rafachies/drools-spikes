@@ -1,0 +1,19 @@
+package insurance;
+ 
+import org.chies.drools.spike.dsl.*; 
+ 
+expander insuranceProposal.dsl;
+
+rule "Carro Popular"
+    when
+        carro tipo popular
+    then
+        score incrementa 10
+end
+
+rule "Carro Sedan"
+    when
+        carro tipo sedan
+    then
+        score incrementa 30
+end

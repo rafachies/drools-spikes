@@ -1,0 +1,28 @@
+package insurance;
+ 
+import org.chies.drools.spike.dsl.*; 
+ 
+expander insuranceProposal.dsl;
+ 
+rule "Cliente Velho"
+    when
+        cliente idade velho
+    then
+        score incrementa 10
+end
+
+rule "Cliente Jovem"
+    when
+        cliente idade velho
+    then
+        score incrementa 30
+end
+
+rule "Cliente Adulto"
+    when
+        cliente idade adulto
+    then
+        score incrementa 50
+end
+
+

@@ -1,0 +1,12 @@
+package insurance;
+ 
+import org.chies.drools.spike.dsl.*; 
+ 
+expander insuranceProposal.dsl;
+
+rule "Cliente Negativado no SCPC"
+    when
+        cliente scpc positivo
+    then
+        score decrementa 50
+end

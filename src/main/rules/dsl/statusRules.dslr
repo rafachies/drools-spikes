@@ -1,0 +1,20 @@
+package insurance;
+ 
+import org.chies.drools.spike.dsl.*; 
+ 
+expander insuranceProposal.dsl;
+
+# Rules locale based
+rule "Cliente Solteiro"
+    when
+        cliente estado solteiro
+    then
+        score incrementa 20
+end
+
+rule "Cliente Casado"
+    when
+        cliente estado casado
+    then
+        score incrementa 50
+end

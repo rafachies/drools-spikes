@@ -3,6 +3,8 @@ package org.chies.drools.spike.decisiontable;
 import java.net.URL;
 
 import org.drools.KnowledgeBase;
+import org.drools.agent.KnowledgeAgent;
+import org.drools.agent.KnowledgeAgentFactory;
 import org.drools.builder.KnowledgeBuilder;
 import org.drools.builder.KnowledgeBuilderFactory;
 import org.drools.builder.ResourceType;
@@ -11,6 +13,8 @@ import org.drools.io.impl.ClassPathResource;
 import org.drools.runtime.StatefulKnowledgeSession;
 
 public class Main {
+
+	private static final String AGENT_NAME = "agentName";
 
 	public static void main(String[] args) {
 		try {
@@ -24,10 +28,12 @@ public class Main {
 	}
 	
 	private static StatefulKnowledgeSession createStatefulSessionWithChangeset() {
-		KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
-		URL changesetUrl = Thread.currentThread().getContextClassLoader().getResource("change-set.xml");
-		knowledgeBuilder.add(ResourceFactory.newUrlResource(changesetUrl), ResourceType.CHANGE_SET );
-		KnowledgeBase knowledgeBase = knowledgeBuilder.newKnowledgeBase();
+		KnowledgeAgent knowledgeAgent = KnowledgeAgentFactory.newKnowledgeAgent(AGENT_NAME);
+		URL changesetUrl = Thread.currentThread().getContextClassLoader().getResource("decisiontable/change-set.xml");
+		knowledgeAgent.applyChangeSet(ResourceFactory.newUrlResource(changesetUrl));
+		KnowledgeBase knowledgeBase = knowledgeAgent.getKnowledgeBase();
+		ResourceFactory.getResourceChangeNotifierService().start();
+		ResourceFactory.getResourceChangeScannerService().start();
 		return knowledgeBase.newStatefulKnowledgeSession();
 	}
 
